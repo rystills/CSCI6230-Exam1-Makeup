@@ -79,9 +79,10 @@ def millerRobin(n):
 @param n: the number to factorize
 @returns: a factor of n or None, if no such factor was discovered
 """
-def pollardRho(n):
+def pollardRho(n,secondTry = False):
     """hard-coded polynomial; here we use (x^2+1)%n
     @param v: the value to run through the polynomial
+    @param secondTry: whether or not this is our second try; if it is, initialize x and y to 3 instead of 2
     @returns: the result of applying v to g
     """
     def g(v):
@@ -97,22 +98,20 @@ def pollardRho(n):
             a, b = b, a%b
         return a
 
-    x = 2
-    y = 2
+    x = y = 3 if secondTry else 2
     d = 1
     while (d == 1):
         x = g(x)
         y = g(g(y))
         d = gcd(abs(x - y), n)
-    return None if (d == n) else d
+    if (d == n):
+        #if this is our first attempt, try again with x=y=3; otherwise, there's nothing more we can do
+        return None if secondTry else pollardRho(n,True)
+    return d
 
 def main():
-    ints = [31531, 520482, 485827]
-    for i in ints:
-        mr = millerRobin(i)
-        print("{0} is {1}prime".format(i,"" if mr else "not "))
-        if (not mr):
-            print("{0} factored is {1}".format(i,pollardRho(i)))
+    for i in [31531, 520482, 485827]:
+        print("{0} is {1}".format(i,"prime" if millerRobin(i) else "not prime; factored, it becomes {0}".format(pollardRho(i))))
 
 if __name__ == "__main__":
     main()
