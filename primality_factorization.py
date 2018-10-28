@@ -47,7 +47,6 @@ def millerRobin(n):
         while (d != n - 1):
             x = x**2 % n
             d *= 2
-          
             if (x == 1):
                 return False
             if (x == n - 1):
@@ -111,7 +110,7 @@ def pollardRho(n,secondTry = False):
 
 def main():
     for i in [31531, 520482, 485827]:
-        print("{0} is {1}".format(i,"prime" if millerRobin(i) else "not prime; factored, it becomes {0}".format(pollardRho(i))))
+        print("{0} is {1}".format(i,"prime" if millerRobin(i) else "not prime; factoring it yields {0}".format(pollardRho(i))))
 
 if __name__ == "__main__":
     main()
