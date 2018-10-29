@@ -17,33 +17,23 @@ def millerRobin(n):
         @param p: copy of n
         """
         def power(x,y,p):
-            res = 1 #Initialize result
-            #Update x if it is more than or equal to p
+            res = 1
             x = x % p;
             while (y > 0):
-                #If y is odd, multiply x with result
                 if ((y & 1) == 1):
                     res = (res * x) % p
-
-                #y must be even now
-                y = y >> 1; # y = y/2
+                y = y >> 1
                 x = (x * x) % p
             return res
         
-        #Pick a random number in [2..n-2]
-        #Corner cases make sure that n > 4
         a = 2 + int((random.random() % (n - 4)))
-      
         #Compute a^d % n
         x = power(a, d, n)
-      
+        #base case
         if (x == 1 or x == n - 1):
             return True
       
-        #Keep squaring x while one of the following doesn't happen
-        #(i) d does not reach n-1
-        #(ii) (x^2) % n is not 1
-        #(iii) (x^2) % n is not n-1
+        #square x until d reaches n-1, or (x^2) % n becomes 1 or n-1
         while (d != n - 1):
             x = x**2 % n
             d *= 2
@@ -52,7 +42,7 @@ def millerRobin(n):
             if (x == n - 1):
                 return True
       
-        #Return composite
+        #return composite
         return False
     
     #1. base case: small #'s
@@ -109,7 +99,7 @@ def pollardRho(n,secondTry = False):
     return d
 
 def main():
-    for i in [31531, 520482, 485827]:
+    for i in [31531, 520482, 485827, 15485863]:
         print("{0} is {1}".format(i,"prime" if millerRobin(i) else "not prime; factoring it yields {0}".format(pollardRho(i))))
 
 if __name__ == "__main__":
