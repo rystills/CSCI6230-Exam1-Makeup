@@ -17,8 +17,8 @@ convert base 10 number i to base b with a maximum num digits n
 def baseConvert(i,b,n):
     result = []
     while i > 0:
-            result.insert(0, i % b)
-            i //= b
+        result.insert(0, i % b)
+        i //= b
     return [0]*(n-len(result)) + result
 
 
@@ -57,11 +57,15 @@ def endInsert(originalMessage,fraudMessage):
 """
 def interweave(om,fm):
     start_time = time.time()
+    #store the location of all space chars from the original message in oms
     oms = [m.start() for m in re.finditer(' ', om)]
+    #store the location of all space chars from the fraudulent message in fms
     fms = [m.start() for m in re.finditer(' ', fm)]
+    #store the list of space-backspace-space variations in vs
     vs = [" ", " \b ", "  \b", "  \b\b "]
     #2. B generates 2^m/2 variations x' of x 
-    print("generating x' variations of legitimate message")
+    print("generating x' variations of legitimate message...")
+    #store the modified original messages in xpo, and the modified original messages' hashes in xp
     xp = [0]*numVariations
     xpo = [0]*numVariations
     for i in range(numVariations):
@@ -74,15 +78,17 @@ def interweave(om,fm):
     start_time = time.time()
     
     #4. generate variations y' of y until a match is found
-    print("generating and comparing y' variations of fraudulent message")
+    print("generating and comparing y' variations of fraudulent message...")
     for i in range(numVariations):
         curVal = baseConvert(i,4,hashChars)
+        #same technique for variation calculation as with the original message
         fraudVar = fm[:fms[0]] + vs[curVal[0]] + ''.join([fm[fms[r]+1:fms[r+1]] + vs[curVal[r+1]] for r in range(hashChars-1)]) + fm[fms[hashChars-1]+1:]
         hashedFraudVar = hashlib.md5(fraudVar.encode("utf-8")).hexdigest()[:hashChars]
         if hashedFraudVar in xp:
+            #found a match
             ind = xp.index(hashedFraudVar)
-            print("found y' number {0} = {1} with hash {2} matching \nx' number {3} = {4} in time = {5} seconds".format(
-                i,repr(fraudVar),hashedFraudVar,ind, repr(xpo[ind]),int(time.time() - start_time)))
+            print("found y' number {0} = {1} with hash {2} matching \nx' number {3} = {4} with hash {5} in time = {6} seconds".format(
+                i,repr(fraudVar),hashedFraudVar,ind, repr(xpo[ind]),xp[ind],int(time.time() - start_time)))
             return True
     return False
 
@@ -102,6 +108,7 @@ def main():
     if (not interweave(originalMessage,fraudMessage)):
         print("interweave failed to find a match; fall-back to space-backspace end insertion")
         return endInsert(originalMessage, fraudMessage)
+    #5. how you offer the valid variation for signature depends on the situation, but you now have the matching original and fraudulent variations to do with as you please
 
 if __name__ == "__main__":
     main()
