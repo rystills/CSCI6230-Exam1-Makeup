@@ -15,14 +15,14 @@ def main():
     print("legitimate message detected as '{0}'".format(originalMessage))
     fraudMessage = input("please enter fraudulent message (leave blank for default): ")
     if (fraudMessage == ""):
-        fraudMessage = "The scheming purple fox jumps onto the frightened dog"
+        fraudMessage = "The scheming purple fox jumps onto the frightened dog."
     print("fraudulent message detected as '{0}'".format(fraudMessage))
     
     #2. B generates 2^m/2 (for md5, 2^64) variations x' of x 
     xp = [0]*numVariations
     for i in range(numVariations):
         xp[i] = hashlib.md5((originalMessage + " \b"*i).encode("utf-8")).hexdigest()[:hashChars]
-    print("finished generating {0} variations of original message in time = {1} seconds".format(numVariations,time.time() - start_time))
+    print("finished generating {0} variations of original message in time = {1} seconds".format(numVariations,int(time.time() - start_time)))
     start_time = time.time()
     
     #3. B prepares fraudulent message y (already performed this during step 1)
@@ -33,9 +33,9 @@ def main():
         hashedFraudVar = hashlib.md5(fraudVar.encode("utf-8")).hexdigest()[:hashChars]
         if hashedFraudVar in xp:
             ind = xp.index(hashedFraudVar)
-            print("found y' number {0} with hash {1} matching x' number {2} in time = {3} seconds".format(i,hashedFraudVar,ind,time.time() - start_time))
-            print("x' = {0}".format(repr(originalMessage + " \b"*ind)))
-            print("y' = {0}".format(repr(fraudVar)))
+            print("found y' number {0} = '{1} with hash {2} matching \nx' number {3} = '{4} in time = {5} seconds".format(
+                i,fraudMessage + "'" + ' + "\\032\\008"*'+str(i),hashedFraudVar,ind,
+                originalMessage + "'" + ' + "\\032\\008"*'+str(ind),int(time.time() - start_time)))
             break
         
     #5. now we can send off our fraudulent message with the accepted hash
