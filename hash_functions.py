@@ -1,11 +1,44 @@
 import hashlib
+import itertools
+import time
+    
+hashBits = 32 #more bits = more secure, but takes longer + more memory
+hashChars = hashBits//4 #(1/4 hex)
+numVariations = 2**(hashBits//2)
 
 def main():
-    print("{0} encoded = {1}".format("a \b ",hashlib.md5("a \b ".encode("utf-8")).hexdigest()))
-    print("{0} encoded = {1}".format("a ",hashlib.md5("a ".encode("utf-8")).hexdigest()))
-    #print(bytes.fromhex("61200863").decode())
-    #print("a\b ")
-    #legitimateMessage = "As the Dean of Blakewell College, I have had the pleasure of knowing Cherise Rosetti for the last four years. She has been a tremendous asset to our school. I would like to take this opportunity to wholeheartedly recommend Cherise for your school's graduate program. I am confident that she will continue to succeed in her studies. She is a dedicated student and thus far her grades have been exemplary. In class, she has proven to be a take-charge person who is able to successfully develop plans and implement them. She has also assisted us in our admissions office. She has successfully demonstrated leadership ability by counseling new and prospective students. Her advice has been a great help to these students, many of whom have taken time to share their comments with me regarding her pleasant and encouraging attitude. For these reasons I highly recommend Cherise without reservation. Her ambition and abilities will truly be an asset to your establishment."
+    start_time = time.time()
+    #1. A is prepared to sign legitimate message x
+    originalMessage = input("please enter legitimate message (leave blank for default): ")
+    if (originalMessage == ""):
+        originalMessage = "The quick brown fox jumps over the lazy dog."
+    print("legitimate message detected as '{0}'".format(originalMessage))
+    fraudMessage = input("please enter fraudulent message (leave blank for default): ")
+    if (fraudMessage == ""):
+        fraudMessage = "The scheming purple fox jumps onto the frightened dog"
+    print("fraudulent message detected as '{0}'".format(fraudMessage))
+    
+    #2. B generates 2^m/2 (for md5, 2^64) variations x' of x 
+    xp = [0]*numVariations
+    for i in range(numVariations):
+        xp[i] = hashlib.md5((originalMessage + " \b"*i).encode("utf-8")).hexdigest()[:hashChars]
+    print("finished generating {0} variations of original message in time = {1} seconds".format(numVariations,time.time() - start_time))
+    start_time = time.time()
+    
+    #3. B prepares fraudulent message y (already performed this during step 1)
+    
+    #4. generate variations y' of y until a match is found
+    for i in itertools.count():
+        fraudVar = fraudMessage + " \b"*i
+        hashedFraudVar = hashlib.md5(fraudVar.encode("utf-8")).hexdigest()[:hashChars]
+        if hashedFraudVar in xp:
+            ind = xp.index(hashedFraudVar)
+            print("found y' number {0} with hash {1} matching x' number {2} in time = {3} seconds".format(i,hashedFraudVar,ind,time.time() - start_time))
+            print("x' = {0}".format(repr(originalMessage + " \b"*ind)))
+            print("y' = {0}".format(repr(originalMessage + " \b"*ind)))
+            break
+        
+    #5. now we can send off our fraudulent message with the accepted hash
 
 if __name__ == "__main__":
     main()
