@@ -65,9 +65,9 @@ def interweave(om,fm):
     xp = [0]*numVariations
     xpo = [0]*numVariations
     for i in range(numVariations):
-        curVal = baseConvert(i,4,8)
-        modifiedMessage = om[:oms[0]] + vs[curVal[0]] + om[oms[0]+1:oms[1]] + vs[curVal[1]] + om[oms[1]+1:oms[2]] + vs[curVal[2]] + om[oms[2]+1:oms[3]] + vs[curVal[3]] \
-        + om[oms[3]+1:oms[4]] + vs[curVal[4]] + om[oms[4]+1:oms[5]] + vs[curVal[5]] + om[oms[5]+1:oms[6]] + vs[curVal[6]] + om[oms[6]+1:oms[7]] + vs[curVal[7]] + om[oms[7]+1:]
+        curVal = baseConvert(i,4,hashChars)
+        #bit of trickery to insert all of our variations quickly and largely statelessly
+        modifiedMessage = om[:oms[0]] + vs[curVal[0]] + ''.join([om[oms[r]+1:oms[r+1]] + vs[curVal[r+1]] for r in range(hashChars-1)]) + om[oms[hashChars-1]+1:]
         xp[i] = hashlib.md5(modifiedMessage.encode("utf-8")).hexdigest()[:hashChars]
         xpo[i] = modifiedMessage
     print("finished generating {0} variations of original message in time = {1} seconds".format(numVariations,int(time.time() - start_time)))
@@ -76,9 +76,8 @@ def interweave(om,fm):
     #4. generate variations y' of y until a match is found
     print("generating and comparing y' variations of fraudulent message")
     for i in range(numVariations):
-        curVal = baseConvert(i,4,8)
-        fraudVar = fm[:fms[0]] + vs[curVal[0]] + fm[fms[0]+1:fms[1]] + vs[curVal[1]] + fm[fms[1]+1:fms[2]] + vs[curVal[2]] + fm[fms[2]+1:fms[3]] + vs[curVal[3]] \
-        + fm[fms[3]+1:fms[4]] + vs[curVal[4]] + fm[fms[4]+1:fms[5]] + vs[curVal[5]] + fm[fms[5]+1:fms[6]] + vs[curVal[6]] + fm[fms[6]+1:fms[7]] + vs[curVal[7]] + fm[fms[7]+1:]
+        curVal = baseConvert(i,4,hashChars)
+        fraudVar = fm[:fms[0]] + vs[curVal[0]] + ''.join([fm[fms[r]+1:fms[r+1]] + vs[curVal[r+1]] for r in range(hashChars-1)]) + fm[fms[hashChars-1]+1:]
         hashedFraudVar = hashlib.md5(fraudVar.encode("utf-8")).hexdigest()[:hashChars]
         if hashedFraudVar in xp:
             ind = xp.index(hashedFraudVar)
@@ -97,11 +96,11 @@ def main():
     if (fraudMessage == ""):
         fraudMessage = "The scheming purple fox jumps onto the frightened dog."
     print("fraudulent message detected as '{0}'".format(fraudMessage))
-    if (len(fraudMessage.split(" ")) < 9 or len(originalMessage.split(" ")) < 9):
+    if (len(fraudMessage.split(" ")) < hashChars+1 or len(originalMessage.split(" ")) < hashChars+1):
         print("too few spaces to properly interweave insertions; sticking space-backspace characters at the end instead")
         return endInsert(originalMessage,fraudMessage)
     if (not interweave(originalMessage,fraudMessage)):
-        print("interweave failed to find a match; fall-back to space-back end insertion")
+        print("interweave failed to find a match; fall-back to space-backspace end insertion")
         return endInsert(originalMessage, fraudMessage)
 
 if __name__ == "__main__":
