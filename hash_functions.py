@@ -35,7 +35,7 @@ def main():
             ind = xp.index(hashedFraudVar)
             print("found y' number {0} with hash {1} matching x' number {2} in time = {3} seconds".format(i,hashedFraudVar,ind,time.time() - start_time))
             print("x' = {0}".format(repr(originalMessage + " \b"*ind)))
-            print("y' = {0}".format(repr(originalMessage + " \b"*ind)))
+            print("y' = {0}".format(repr(fraudVar)))
             break
         
     #5. now we can send off our fraudulent message with the accepted hash
